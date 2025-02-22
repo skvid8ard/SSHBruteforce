@@ -1,0 +1,35 @@
+version: "3.9"
+
+services:
+  server-container:
+    image: ssh-server
+    build:
+      context: .
+      dockerfile: Dockerfile.ssh-server
+    privileged: true
+    networks:
+      internal_net:
+        ipv4_address: 172.20.0.3  # Фиксированный IP для сервера
+    restart: always
+
+  client-container:
+    image: ssh-client
+    build:
+      context: .
+      dockerfile: Dockerfile.ssh-client
+    networks:
+      internal_net:
+        ipv4_address: 172.20.0.2  # Фиксированный IP для клиента
+    depends_on:
+      - server-container
+    restart: always
+    ports:
+      - "2222:22"
+
+networks:
+  internal_net:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/24  # Задаём фиксированную подсеть
+

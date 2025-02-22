@@ -1,0 +1,25 @@
+# Базовый образ клиента
+FROM ubuntu:latest
+
+# Устанавливаем необходимые пакеты: SSH-сервер и bash
+RUN apt update && apt install -y openssh-server sshpass bash nmap hydra iproute2 iputils-ping
+
+# Генерация ключей SSH
+RUN ssh-keygen -A
+
+# Создаем директорию для SSH
+#RUN mkdir /var/run/sshd
+
+RUN echo "root:prettypass" | chpasswd
+
+# Разрешаем подключение по SSH для root
+RUN echo "PermitRootLogin yes" >> /etc/ssh/sshd_config
+
+COPY rockyou.txt /root/
+
+# Открываем порт для SSH
+EXPOSE 22
+
+# Запускаем SSH сервер
+CMD mkdir -p /var/run/sshd && exec /usr/sbin/sshd -D
+

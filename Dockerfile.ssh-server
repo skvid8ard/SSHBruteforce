@@ -1,0 +1,30 @@
+# Базовый образ сервера
+FROM ubuntu:latest
+
+# Устанавливаем SSH-сервер
+RUN apt update && apt install -y openssh-server bash iproute2 iptables
+
+# Генерация ключей SSH
+RUN ssh-keygen -A
+
+# Создаем пользователя и устанавливаем пароль
+RUN echo "root:blink182" | chpasswd
+
+# Создаем директорию для SSH
+RUN mkdir /var/run/sshd
+
+# Разрешаем подключение по SSH для root
+RUN echo "PermitRootLogin yes" >> /etc/ssh/sshd_config #&& \
+
+# Размещаем флаг в /root
+RUN touch /root/flag.txt
+RUN echo "CTF{3sC@p3_Fr0m_D0Ck3R?}" > /root/flag.txt
+
+# Открываем порты для SSH и Docker API
+EXPOSE 22
+
+# Запускаем Docker и SSH сервер
+CMD (iptables -A INPUT -p tcp --dport 22 -s 172.20.0.2 -j ACCEPT && \
+     iptables -A INPUT -p tcp --dport 22 -j DROP); \
+    mkdir -p /var/run/sshd  && exec /usr/sbin/sshd -D
+
